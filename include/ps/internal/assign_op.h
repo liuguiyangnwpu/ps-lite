@@ -67,6 +67,5 @@ inline void AssignFuncInt(const T& lhs, AssignOp op, T* rhs) {
   }
 }
 
-
 }  // namespace ps
 #endif  // PS_INTERNAL_ASSIGN_OP_H_

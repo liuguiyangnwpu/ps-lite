@@ -20,17 +20,10 @@ namespace dmlc {
  *  default logger if DMLC_LOG_FATAL_THROW == 1
  */
 struct Error : public std::runtime_error {
-  /*!
-   * \brief constructor
-   * \param s the error message
-   */
-  explicit Error(const std::string &s) : std::runtime_error(s) {}
+    explicit Error(const std::string &s) : std::runtime_error(s) {}
 };
-}  // namespace dmlc
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-#define noexcept(a)
-#endif
+}  // namespace dmlc
 
 #if DMLC_USE_CXX11
 #define DMLC_THROW_EXCEPTION noexcept(false)
@@ -42,9 +35,11 @@ struct Error : public std::runtime_error {
 #include <glog/logging.h>
 
 namespace dmlc {
+
 inline void InitLogging(const char* argv0) {
-  google::InitGoogleLogging(argv0);
+    google::InitGoogleLogging(argv0);
 }
+
 }  // namespace dmlc
 
 #else
@@ -53,10 +48,6 @@ inline void InitLogging(const char* argv0) {
 #include <iostream>
 #include <sstream>
 #include <ctime>
-
-#if defined(_MSC_VER)
-#pragma warning(disable : 4722)
-#endif
 
 namespace dmlc {
 inline void InitLogging(const char* argv0) {
@@ -133,99 +124,92 @@ inline void InitLogging(const char* argv0) {
 #define LOG_EVERY_N(severity, n) LOG(severity)
 
 class DateLogger {
- public:
-  DateLogger() {
-#if defined(_MSC_VER)
-    _tzset();
-#endif
-  }
-  const char* HumanDate() {
-#if defined(_MSC_VER)
-    _strtime_s(buffer_, sizeof(buffer_));
-#else
-    time_t time_value = time(NULL);
-    struct tm now;
-    localtime_r(&time_value, &now);
-    snprintf(buffer_, sizeof(buffer_), "%02d:%02d:%02d", now.tm_hour,
-             now.tm_min, now.tm_sec);
-#endif
-    return buffer_;
-  }
- private:
-  char buffer_[9];
+public:
+    DateLogger() {}
+
+    const char* HumanDate() {
+        time_t time_value = time(NULL);
+        struct tm now;
+        localtime_r(&time_value, &now);
+        snprintf(buffer_, sizeof(buffer_), "%02d:%02d:%02d", now.tm_hour, now.tm_min, now.tm_sec);
+        return buffer_;
+    }
+private:
+    char buffer_[9];
 };
 
 class LogMessage {
- public:
-  LogMessage(const char* file, int line)
+public:
+    LogMessage(const char* file, int line)
       :
 #ifdef __ANDROID__
         log_stream_(std::cout)
 #else
         log_stream_(std::cerr)
 #endif
-  {
-    log_stream_ << "[" << pretty_date_.HumanDate() << "] " << file << ":"
-                << line << ": ";
-  }
-  ~LogMessage() { log_stream_ << "\n"; }
-  std::ostream& stream() { return log_stream_; }
+    {
+        log_stream_ << "[" << pretty_date_.HumanDate() << "] " << file << ":" << line << ": ";
+    }
+    ~LogMessage() { log_stream_ << "\n"; }
+    std::ostream& stream() { return log_stream_; }
 
- protected:
-  std::ostream& log_stream_;
+protected:
+    std::ostream& log_stream_;
 
- private:
-  DateLogger pretty_date_;
-  LogMessage(const LogMessage&);
-  void operator=(const LogMessage&);
+private:
+    DateLogger pretty_date_;
+    LogMessage(const LogMessage&);
+    void operator=(const LogMessage&);
 };
 
 #if DMLC_LOG_FATAL_THROW == 0
 class LogMessageFatal : public LogMessage {
- public:
-  LogMessageFatal(const char* file, int line) : LogMessage(file, line) {}
-  ~LogMessageFatal() {
-    log_stream_ << "\n";
-    abort();
-  }
+public:
+    LogMessageFatal(const char* file, int line) : LogMessage(file, line) {}
+    ~LogMessageFatal() {
+        log_stream_ << "\n";
+        abort();
+    }
 
- private:
-  LogMessageFatal(const LogMessageFatal&);
-  void operator=(const LogMessageFatal&);
+private:
+    LogMessageFatal(const LogMessageFatal&);
+    void operator=(const LogMessageFatal&);
 };
+
 #else
-class LogMessageFatal {
- public:
-  LogMessageFatal(const char* file, int line) {
-    log_stream_ << "[" << pretty_date_.HumanDate() << "] " << file << ":"
-                << line << ": ";
-  }
-  std::ostringstream &stream() { return log_stream_; }
-  ~LogMessageFatal() DMLC_THROW_EXCEPTION {
-    // throwing out of destructor is evil
-    // hopefully we can do it here
-    // also log the message before throw
-    LOG(ERROR) << log_stream_.str();
-    throw Error(log_stream_.str());
-  }
 
- private:
-  std::ostringstream log_stream_;
-  DateLogger pretty_date_;
-  LogMessageFatal(const LogMessageFatal&);
-  void operator=(const LogMessageFatal&);
+class LogMessageFatal {
+public:
+    LogMessageFatal(const char* file, int line) {
+        log_stream_ << "[" << pretty_date_.HumanDate() << "] " << file << ":" << line << ": ";
+    }
+    std::ostringstream &stream() { return log_stream_; }
+    ~LogMessageFatal() DMLC_THROW_EXCEPTION {
+        // throwing out of destructor is evil
+        // hopefully we can do it here
+        // also log the message before throw
+        LOG(ERROR) << log_stream_.str();
+        throw Error(log_stream_.str());
+    }
+
+private:
+    std::ostringstream log_stream_;
+    DateLogger pretty_date_;
+    LogMessageFatal(const LogMessageFatal&);
+    void operator=(const LogMessageFatal&);
 };
+
 #endif
 
 // This class is used to explicitly ignore values in the conditional
 // logging macros.  This avoids compiler warnings like "value computed
 // is not used" and "statement has no effect".
 class LogMessageVoidify {
- public:
-  LogMessageVoidify() {}
-  // This has to be an operator with a precedence lower than << but
-  // higher than "?:". See its usage.
-  void operator&(std::ostream&) {}
+public:
+    LogMessageVoidify() {}
+    // This has to be an operator with a precedence lower than << but
+    // higher than "?:". See its usage.
+    void operator&(std::ostream&) {}
 };
 
 }  // namespace dmlc

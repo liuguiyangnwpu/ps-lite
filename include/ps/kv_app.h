@@ -11,7 +11,7 @@
 namespace ps {
 
 /**
- * \brief the structure for a list of key-value pairs
+ * the structure for a list of key-value pairs
  *
  * The keys must be unique and sorted in an increasing order.  The length of a
  * value can be more than one. If \a lens is empty, then the length
@@ -31,18 +31,18 @@ namespace ps {
  */
 template <typename Val>
 struct KVPairs {
-  // /** \brief empty constructor */
+  // /** empty constructor */
   // KVPairs() {}
-  /** \brief the list of keys */
-  SArray<Key> keys;
-  /** \brief the according values */
-  SArray<Val> vals;
-  /** \brief the according value lengths (could be empty) */
-  SArray<int> lens;
+  /** the list of keys */
+    SArray<Key> keys;
+  /** the according values */
+    SArray<Val> vals;
+  /** the according value lengths (could be empty) */
+    SArray<int> lens;
 };
 
 /**
- * \brief A worker node that can \ref Push (\ref Pull) key-value pairs to (from) server
+ * A worker node that can \ref Push (\ref Pull) key-value pairs to (from) server
  * nodes
  *
  * \tparam Val the type of value, which should be primitive types such as
@@ -54,7 +54,7 @@ class KVWorker : public SimpleApp {
   /** avoid too many this-> */
   using SimpleApp::obj_;
   /**
-   * \brief callback function for \ref Push and \ref Pull
+   * callback function for \ref Push and \ref Pull
    *
    * It is called by the data receiving thread of this instance when the push or
    * pull is actually finished. Namely the kv pairs have already written into
@@ -63,7 +63,7 @@ class KVWorker : public SimpleApp {
   using Callback = std::function<void()>;
 
   /**
-   * \brief constructor
+   * constructor
    *
    * \param app_id the app id, should match with \ref KVServer's id
    */
@@ -73,11 +73,11 @@ class KVWorker : public SimpleApp {
     obj_ = new Customer(app_id, std::bind(&KVWorker<Val>::Process, this, _1));
   }
 
-  /** \brief deconstructor */
+  /** deconstructor */
   virtual ~KVWorker() { delete obj_; obj_ = nullptr; }
 
   /**
-   * \brief Pushes a list of key-value pairs to all server nodes.
+   * Pushes a list of key-value pairs to all server nodes.
    *
    * This function pushes a KV list specified by \a keys and \a vals to all
    * server nodes.
@@ -117,7 +117,7 @@ class KVWorker : public SimpleApp {
   }
 
   /**
-   * \brief Pulls the values associated with the keys from the server nodes
+   * Pulls the values associated with the keys from the server nodes
    *
    * This function pulls the values of the keys specified in \a keys from the
    * server nodes. The format is same to \ref KVPairs
@@ -151,7 +151,7 @@ class KVWorker : public SimpleApp {
   }
 
   /**
-   * \brief Waits until a push or pull has been finished
+   * Waits until a push or pull has been finished
    *
    * Sample usage:
    * \code
@@ -165,7 +165,7 @@ class KVWorker : public SimpleApp {
   void Wait(int timestamp) { obj_->WaitRequest(timestamp); }
 
   /**
-   * \brief zero-copy Push
+   * zero-copy Push
    *
    * This function is similar to \ref Push except that all data
    * will not be copied into system for better performance. It is the caller's
@@ -188,7 +188,7 @@ class KVWorker : public SimpleApp {
   }
 
   /**
-   * \brief zero-copy Pull
+   * zero-copy Pull
    *
    * This function is similar to \ref Pull except that all data
    * will not be copied into system for better performance. It is the caller's
@@ -204,7 +204,7 @@ class KVWorker : public SimpleApp {
   }
   using SlicedKVs = std::vector<std::pair<bool, KVPairs<Val>>>;
   /**
-   * \brief a slicer partitions a key-value list according to the key ranges
+   * a slicer partitions a key-value list according to the key ranges
    * \param send the kv list for partitioning
    * \param ranges the key ranges, ranges[i] is the key range of server i
    * \param sliced the sliced lists. slices[i] should only contains keys in
@@ -215,7 +215,7 @@ class KVWorker : public SimpleApp {
       SlicedKVs* sliced)>;
 
   /**
-   * \brief set a user-defined slicer
+   * set a user-defined slicer
    */
   void set_slicer(const Slicer& slicer) {
     CHECK(slicer); slicer_ = slicer;
@@ -223,13 +223,13 @@ class KVWorker : public SimpleApp {
 
  private:
   /**
-   * \brief internal pull, C/D can be either SArray or std::vector
+   * internal pull, C/D can be either SArray or std::vector
    */
   template <typename C, typename D>
   int Pull_(const SArray<Key>& keys, C* vals, D* lens,
             int cmd, const Callback& cb);
   /**
-   * \brief add a callback for a request. threadsafe.
+   * add a callback for a request. threadsafe.
    * @param cb callback
    * @param timestamp the timestamp of the request
    */
@@ -240,54 +240,54 @@ class KVWorker : public SimpleApp {
   }
 
   /**
-   * \brief run and delete the callback
+   * run and delete the callback
    * \param timestamp the timestamp of the callback
    */
   void RunCallback(int timestamp);
   /**
-   * \brief send the kv list to all servers
+   * send the kv list to all servers
    * @param timestamp the timestamp of the request
    * @param push whether or not it is a push request
    * @param cmd command
    */
   void Send(int timestamp, bool push, int cmd, const KVPairs<Val>& kvs);
-  /** \brief internal receive handle */
+  /** internal receive handle */
   void Process(const Message& msg);
-  /** \brief default kv slicer */
+  /** default kv slicer */
   void DefaultSlicer(const KVPairs<Val>& send,
                      const std::vector<Range>& ranges,
                      SlicedKVs* sliced);
 
-  /** \brief data buffer for received kvs for each timestamp */
+  /** data buffer for received kvs for each timestamp */
   std::unordered_map<int, std::vector<KVPairs<Val>>> recv_kvs_;
-  /** \brief callbacks for each timestamp */
+  /** callbacks for each timestamp */
   std::unordered_map<int, Callback> callbacks_;
-  /** \brief lock */
+  /** lock */
   std::mutex mu_;
-  /** \brief kv list slicer */
+  /** kv list slicer */
   Slicer slicer_;
 };
 
-/** \brief meta information about a kv request */
+/** meta information about a kv request */
 struct KVMeta {
-  /** \brief the int cmd */
+  /** the int cmd */
   int cmd;
-  /** \brief whether or not this is a push request */
+  /** whether or not this is a push request */
   bool push;
-  /** \brief sender's node id */
+  /** sender's node id */
   int sender;
-  /** \brief the associated timestamp */
+  /** the associated timestamp */
   int timestamp;
 };
 
 /**
- * \brief A server node for maintaining key-value pairs
+ * A server node for maintaining key-value pairs
  */
 template <typename Val>
 class KVServer : public SimpleApp {
  public:
   /**
-   * \brief constructor
+   * constructor
    * \param app_id the app id, should match with \ref KVWorker's id
    */
   explicit KVServer(int app_id) : SimpleApp() {
@@ -295,11 +295,11 @@ class KVServer : public SimpleApp {
     obj_ = new Customer(app_id, std::bind(&KVServer<Val>::Process, this, _1));
   }
 
-  /** \brief deconstructor */
+  /** deconstructor */
   virtual ~KVServer() { delete obj_; obj_ = nullptr; }
 
   /**
-   * \brief the handle to process a push/pull request from a worker
+   * the handle to process a push/pull request from a worker
    * \param req_meta meta-info of this request
    * \param req_data kv pairs of this request
    * \param server this pointer
@@ -313,22 +313,22 @@ class KVServer : public SimpleApp {
   }
 
   /**
-   * \brief response to the push/pull request
+   * response to the push/pull request
    * \param req the meta-info of the request
    * \param res the kv pairs that will send back to the worker
    */
   void Response(const KVMeta& req, const KVPairs<Val>& res = KVPairs<Val>());
 
  private:
-  /** \brief internal receive handle */
+  /** internal receive handle */
   void Process(const Message& msg);
-  /** \brief request handle */
+  /** request handle */
   ReqHandle request_handle_;
 };
 
 
 /**
- * \brief an example handle adding pushed kv into store
+ * an example handle adding pushed kv into store
  */
 template <typename Val>
 struct KVServerDefaultHandle {
