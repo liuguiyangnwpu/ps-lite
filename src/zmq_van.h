@@ -225,9 +225,9 @@ private:
     }
 
     void *context_ = nullptr;
-  /**
-   * node_id to the socket for sending data to this node
-   */
+    /**
+    * node_id to the socket for sending data to this node
+    */
     std::unordered_map<int, void*> senders_;
     std::mutex mu_;
     void *receiver_ = nullptr;
