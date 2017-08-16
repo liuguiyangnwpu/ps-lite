@@ -47,22 +47,22 @@ ${CITYHASH}:
 	rm -rf $(FILE) $(DIR)
 
 
-# # gflags
-# ${DEPS_PATH}/include/google/gflags.h:
-# 	$(eval FILE=gflags-2.0-no-svn-files.tar.gz)
-# 	$(eval DIR=gflags-2.0)
-# 	rm -rf $(FILE) $(DIR)
-# 	wget $(URL)/$(FILE) && tar -zxf $(FILE)
-# 	cd $(DIR) && ./configure -prefix=$(DEPS_PATH) && $(MAKE) && $(MAKE) install
-# 	rm -rf $(FILE) $(DIR)
-# gflags: | ${DEPS_PATH}/include/google/gflags.h
+# gflags
+${DEPS_PATH}/include/google/gflags.h:
+	$(eval FILE=gflags-2.0-no-svn-files.tar.gz)
+	$(eval DIR=gflags-2.0)
+	rm -rf $(FILE) $(DIR)
+	wget $(URL)/$(FILE) && tar -zxf $(FILE)
+	cd $(DIR) && ./configure -prefix=$(DEPS_PATH) && $(MAKE) && $(MAKE) install
+	rm -rf $(FILE) $(DIR)
+gflags: | ${DEPS_PATH}/include/google/gflags.h
 
-# # glog
-# ${DEPS_PATH}/include/glog/logging.h: | ${DEPS_PATH}/include/google/gflags.h
-# 	$(eval FILE=v0.3.4.tar.gz)
-# 	$(eval DIR=glog-0.3.4)
-# 	rm -rf $(FILE) $(DIR)
-# 	wget https://github.com/google/glog/archive/$(FILE) && tar -zxf $(FILE)
-# 	cd $(DIR) && ./configure -prefix=$(DEPS_PATH) --with-gflags=$(DEPS_PATH) && $(MAKE) && $(MAKE) install
-# 	rm -rf $(FILE) $(DIR)
-# glog: | ${DEPS_PATH}/include/glog/logging.h
+# glog
+${DEPS_PATH}/include/glog/logging.h: | ${DEPS_PATH}/include/google/gflags.h
+	$(eval FILE=v0.3.4.tar.gz)
+	$(eval DIR=glog-0.3.4)
+	rm -rf $(FILE) $(DIR)
+	wget https://github.com/google/glog/archive/$(FILE) && tar -zxf $(FILE)
+	cd $(DIR) && ./configure -prefix=$(DEPS_PATH) --with-gflags=$(DEPS_PATH) && $(MAKE) && $(MAKE) install
+	rm -rf $(FILE) $(DIR)
+glog: | ${DEPS_PATH}/include/glog/logging.h
